@@ -81,6 +81,20 @@ def from_all_distances_to_nndistances(pdist_matrix, maxk):
     distances = np.asarray(np.take_along_axis(pdist_matrix, dist_indices, axis=1))
     return distances, dist_indices
 
+def angular_distance(v1, v2):
+    """Compute the angular distance between two vectors."""
+    dot_product = np.dot(v1, v2)
+    norm_product = np.linalg.norm(v1) * np.linalg.norm(v2)
+    cosine_similarity = dot_product / norm_product
+    # Ensure the value falls within the valid domain for arccos, which is [-1, 1]
+    cosine_similarity = np.clip(cosine_similarity, -1, 1)
+    angle = np.arccos(cosine_similarity)
+    return angle / np.pi
+
+def cosine_distance(v1, v2):
+    """Compute the cosine distance between two vectors."""
+    similarity = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    return 1 - similarity
 
 def compute_cross_nn_distances(
     X_new, X, maxk, metric="euclidean", period=None, n_jobs=None
@@ -104,13 +118,17 @@ def compute_cross_nn_distances(
     """
 
     if period is None:
-        nbrs = NearestNeighbors(n_neighbors=maxk, metric=metric, n_jobs=n_jobs).fit(X)
+        if metric == "cosine":
+            nbrs = NearestNeighbors(n_neighbors=maxk, metric=angular_distance, algorithm="ball_tree", n_jobs=n_jobs).fit(X)
+        else:
+            nbrs = NearestNeighbors(n_neighbors=maxk, metric=metric, n_jobs=n_jobs).fit(X)
 
         distances, dist_indices = nbrs.kneighbors(X_new)
 
         # in case of hamming distance, make them integer
         if metric == "hamming":
             distances *= X.shape[1]
+
 
     else:
         if metric == "euclidean" or metric == "minkowski":
