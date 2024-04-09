@@ -22,7 +22,7 @@ from scipy.special import binom
 from scipy.stats import beta as beta_d
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
-
+from dadapy._cython import metrics as c_metrics
 cores = multiprocessing.cpu_count()
 
 
@@ -87,8 +87,9 @@ def angular_distance(v1, v2):
     norm_product = np.linalg.norm(v1) * np.linalg.norm(v2)
     cosine_similarity = dot_product / norm_product
     # Ensure the value falls within the valid domain for arccos, which is [-1, 1]
-    cosine_similarity = np.clip(cosine_similarity, -1, 1)
-    angle = np.arccos(cosine_similarity)
+    cosine_similarity1 = np.clip(cosine_similarity, -1, 1)
+    assert cosine_similarity == cosine_similarity1 # Ensure the value is not out of bounds
+    angle = np.arccos(cosine_similarity) #could they be negative?
     return angle / np.pi
 
 def cosine_distance(v1, v2):
@@ -119,7 +120,7 @@ def compute_cross_nn_distances(
 
     if period is None:
         if metric == "cosine":
-            nbrs = NearestNeighbors(n_neighbors=maxk, metric=angular_distance, algorithm="ball_tree", n_jobs=n_jobs).fit(X)
+            nbrs = NearestNeighbors(n_neighbors=maxk, metric=c_metrics.angular_distance, algorithm="brute_force", n_jobs=n_jobs).fit(X)
         else:
             nbrs = NearestNeighbors(n_neighbors=maxk, metric=metric, n_jobs=n_jobs).fit(X)
 

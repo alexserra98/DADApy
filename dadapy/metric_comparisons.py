@@ -27,6 +27,7 @@ import numpy as np
 from joblib import Parallel, delayed
 
 from dadapy._cython import cython_overlap as c_ov
+
 from dadapy._utils.metric_comparisons import (
     _compute_2d_grid,
     _return_imbalance,
@@ -647,7 +648,7 @@ class MetricComparisons(Base):
 
     def return_label_overlap(
         self, labels, k=None, avg=True, coords=None, class_fraction=None, weighted=True
-    ):
+    ):  
         """Return the neighbour overlap between the full space and a set of labels.
 
         An overlap of 1 means that all neighbours of a point have the same label as the central point.
