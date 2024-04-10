@@ -120,7 +120,7 @@ def compute_cross_nn_distances(
 
     if period is None:
         if metric == "cosine":
-            nbrs = NearestNeighbors(n_neighbors=maxk, metric=c_metrics.angular_distance, algorithm="brute_force", n_jobs=n_jobs).fit(X)
+            nbrs = NearestNeighbors(n_neighbors=maxk, metric=c_metrics.angular_distance, n_jobs=n_jobs).fit(X)
         else:
             nbrs = NearestNeighbors(n_neighbors=maxk, metric=metric, n_jobs=n_jobs).fit(X)
 
